@@ -1,8 +1,13 @@
+// const express = require('express');
+// const bodyParser = require('body-parser');
+// const mysql = require('mysql2');
+// const bcrypt = require('bcryptjs');
+// const jwt = require('jsonwebtoken');
+// const dotenv = require('dotenv');
+
 const express = require('express');
 const bodyParser = require('body-parser');
-const mysql = require('mysql2');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const { Pool } = require('pg'); // Use pg to connect to PostgreSQL
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -18,19 +23,49 @@ app.listen(PORT, () => {
 });
 
 
-const db = mysql.createConnection({
-  host: process.env.MYSQL_HOST,
-  user: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE,
+// const db = mysql.createConnection({
+//   host: process.env.MYSQL_HOST,
+//   user: process.env.MYSQL_USER,
+//   password: process.env.MYSQL_PASSWORD,
+//   database: process.env.MYSQL_DATABASE,
+// });
+
+const pool = new Pool({
+  user: process.env.PG_USER || 'mysql_304b_user',
+  host: process.env.PG_HOST || 'dpg-copmjasf7o1s73e2imig-a.oregon-postgres.render.com',
+  database: process.env.PG_DATABASE || 'mysql_304b',
+  password: process.env.PG_PASSWORD || 'ZvV3PYTEyVihq23dMOLoayg7K5j0xeyG',
+  port: process.env.PG_PORT || 5432, 
 });
 
-db.connect((err) => {
+
+// db.connect((err) => {
+//   if (err) {
+//     console.error('Error connecting to MySQL:', err);
+//   } else {
+//     console.log('Connected to MySQL');
+//   }
+// });
+
+// db.connect((err) => {
+//   if (err) {
+//     console.error('Error connecting to MySQL:', err.message);
+//   } else {
+//     console.log('Connected to MySQL');
+//   }
+// });
+
+pool.connect((err, client, release) => {
   if (err) {
-    console.error('Error connecting to MySQL:', err);
+    console.error('Error connecting to PostgreSQL:', err.message);
   } else {
-    console.log('Connected to MySQL');
+    console.log('Connected to PostgreSQL');
+    release(); // Release the client back to the pool
   }
+});
+
+app.get('/', (req, res) => {
+  res.send('Welcome to the PostgreSQL backend!');
 });
 
 
